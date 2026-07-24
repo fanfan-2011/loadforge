@@ -1,0 +1,30 @@
+# Go binary
+loadforge
+*.exe
+*.test
+*.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# Node modules
+node_modules/
+report/ui/node_modules/
+
+# Vue build output
+report/ui/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
