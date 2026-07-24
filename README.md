@@ -53,8 +53,15 @@ LoadForge is a high-performance, cross-platform, **single-binary** HTTP/HTTPS lo
 Install LoadForge anywhere on Linux/macOS with a single curl command:
 
 ```bash
+# Standard install
 curl -fsSL https://github.com/fanfan-2011/loadforge/raw/main/install.sh | bash
 ```
+
+> 🇨🇳 **中国大陆用户**：如果 DNS 被污染，用以下命令绕过：
+> ```bash
+> curl -fsSL --resolve "github.com:443:20.205.243.166" \
+>   https://github.com/fanfan-2011/loadforge/raw/main/install.sh | bash
+> ```
 
 After installation, verify it works:
 

@@ -56,6 +56,12 @@ Linux/macOS 用户一行命令安装：
 curl -fsSL https://github.com/fanfan-2011/loadforge/raw/main/install.sh | bash
 ```
 
+> 🇨🇳 如果 DNS 被污染，使用以下命令绕过：
+> ```bash
+> curl -fsSL --resolve "github.com:443:20.205.243.166" \
+>   https://github.com/fanfan-2011/loadforge/raw/main/install.sh | bash
+> ```
+
 安装后验证：
 
 ```bash
