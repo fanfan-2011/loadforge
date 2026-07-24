@@ -48,6 +48,25 @@ LoadForge 是一个高性能、跨平台、**单文件发布** 的 HTTP/HTTPS �
 
 ---
 
+## ⚡ 一键安装
+
+Linux/macOS 用户一行命令安装：
+
+```bash
+curl -fsSL https://github.com/fanfan-2011/loadforge/raw/main/install.sh | bash
+```
+
+安装后验证：
+
+```bash
+loadforge --help
+loadforge bench -n 100 -c 10 https://example.com
+```
+
+> 🪟 **Windows 用户**：建议安装 WSL，或用源码编译方式
+
+---
+
 ## 📥 安装指南
 
 ### 系统要求

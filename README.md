@@ -48,6 +48,25 @@ LoadForge is a high-performance, cross-platform, **single-binary** HTTP/HTTPS lo
 
 ---
 
+## ⚡ One-Click Install
+
+Install LoadForge anywhere on Linux/macOS with a single curl command:
+
+```bash
+curl -fsSL https://github.com/fanfan-2011/loadforge/raw/main/install.sh | bash
+```
+
+After installation, verify it works:
+
+```bash
+loadforge --help
+loadforge bench -n 100 -c 10 https://example.com
+```
+
+> 🪟 **Windows users**: Install WSL + Go + Node.js, then use the build-from-source instructions below.
+
+---
+
 ## 📥 Installation
 
 ### System Requirements
