@@ -206,5 +206,9 @@ trap - EXIT
 
 echo -e "${GREEN}✅ LoadForge 安装成功！${NC}"
 echo ""
-echo -e "  运行: ${CYAN}$BIN_NAME bench -n 1000 -c 10 https://example.com${NC}"
+echo -e "   运行: ${CYAN}$BIN_NAME bench -n 1000 -c 10 https://example.com${NC}"
+echo ""
+echo -e "   安装已完成！具体操作可以前往仓库主页查看教程："
+echo -e "   GitHub: ${CYAN}https://github.com/$REPO${NC}"
+echo -e "   Gitee:  ${CYAN}https://gitee.com/$GITEE_REPO${NC}"
 echo ""

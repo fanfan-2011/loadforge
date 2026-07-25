@@ -343,7 +343,7 @@ wait
   -H, --header strings      自定义 Header，可重复（如 -H "Key: Value"）
   -d, --body string         请求 Body
       --json                以 JSON 格式输出结果
-      --report              自动启动 Web 报告服务（端口 8899）
+      --no-report           不启动 Web 报告（默认启用）
       --timeout int         请求超时时间（秒，默认 30）
   -h, --help                查看帮助
 ```
@@ -364,12 +364,17 @@ Web 报告提供丰富的可视化分析。
 
 ### 启动方式
 
-```bash
-# 方式一：测试完成自动启动
-loadforge bench -n 100000 -c 500 --report https://example.com
+Web 报告在每次测试后**自动启动**，无需加任何参数：
 
-# 浏览器打开 http://<局域网IP>:8899
+```bash
+# 测试完成后默认自动启动 Web 报告
+loadforge bench -n 100000 -c 500 https://example.com
+
+# 不需要 Web 报告时加 --no-report
+loadforge bench -n 1000 -c 10 --no-report https://example.com
 ```
+
+启动后在浏览器打开 `http://<局域网IP>:8899`。
 
 ### 报告页面
 

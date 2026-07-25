@@ -337,7 +337,7 @@ Flags:
   -H, --header strings      Custom header, repeatable (e.g. -H "Key: Value")
   -d, --body string         Request body content
       --json                Output results as JSON
-      --report              Auto-start web report server on port 8899
+      --no-report           Skip auto-starting web report (starts by default)
       --timeout int         Request timeout in seconds (default 30)
   -h, --help                Help for bench
 ```
@@ -353,7 +353,7 @@ Flags:
 | `-H` | string[] | — | Pass multiple: `-H "Accept: application/json" -H "X-API-Key: abc"` |
 | `-d` | string | — | Body for POST/PUT. Can be JSON, form data, or raw text. |
 | `--json` | bool | `false` | Suppresses text output, prints JSON to stdout. |
-| `--report` | bool | `false` | Starts web server on `:8899`. Blocks until Ctrl+C. |
+| `--no-report` | bool | `false` | Skip auto-starting the web report server. Web UI starts by default. |
 | `--timeout` | int | `30` | Per-request timeout. Increase for slow endpoints. |
 
 ### Exit Codes
@@ -372,12 +372,17 @@ The web dashboard provides rich visual analysis of your test results.
 
 ### Starting the Dashboard
 
-```bash
-# Option A: Start automatically with --report
-loadforge bench -n 100000 -c 500 --report https://example.com
+The web dashboard starts **automatically** after every test. No flags needed.
 
-# Option B: View historical results by starting a new test with --report
+```bash
+# Web UI starts by default after the test completes
+loadforge bench -n 100000 -c 500 https://example.com
+
+# Skip the web UI if you don't need it
+loadforge bench -n 1000 -c 10 --no-report https://example.com
 ```
+
+After starting, open `http://<LAN-IP>:8899` in your browser.
 
 ### Dashboard Pages
 

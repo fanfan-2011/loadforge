@@ -23,6 +23,7 @@ var (
 	flagD       string
 	flagJSON    bool
 	flagReport  bool
+	flagNoReport bool
 	flagTimeout int
 )
 
@@ -106,7 +107,6 @@ var benchCmd = &cobra.Command{
 		stat := stats.Calculate(result, elapsed)
 
 		// 命令行输出
-		stat.Config = config
 		if flagJSON {
 			enc := json.NewEncoder(os.Stdout)
 			enc.SetIndent("", "  ")
@@ -119,11 +119,12 @@ var benchCmd = &cobra.Command{
 		testID := fmt.Sprintf("%d", time.Now().UnixMilli())
 		s := storage.New()
 		s.SaveConfig(testID, config)
+		stat.Config = config
 		s.SaveResult(testID, stat)
 		s.SaveTimeline(testID, result.Timeline)
 
-		// Web 报告
-		if flagReport {
+		// Web 报告（默认开启，用 --no-report 关闭）
+		if !flagNoReport {
 			fmt.Printf("\n📊 正在启动 Web 报告服务...\n")
 			ip := report.GetLocalIP()
 			go func() {
@@ -218,6 +219,7 @@ func init() {
 	benchCmd.Flags().StringArrayVarP(&flagH, "header", "H", []string{}, "请求 Header (可重复)")
 	benchCmd.Flags().StringVarP(&flagD, "body", "d", "", "请求 Body")
 	benchCmd.Flags().BoolVar(&flagJSON, "json", false, "以 JSON 格式输出")
-	benchCmd.Flags().BoolVar(&flagReport, "report", false, "启动 Web 报告")
+	benchCmd.Flags().BoolVar(&flagReport, "report", true, "启动 Web 报告")
+	benchCmd.Flags().BoolVar(&flagNoReport, "no-report", false, "不启动 Web 报告")
 	benchCmd.Flags().IntVar(&flagTimeout, "timeout", 30, "超时时间 (秒)")
 }
