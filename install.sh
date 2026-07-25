@@ -84,8 +84,8 @@ download_and_install() {
   # 源3: raw.githubusercontent.com (不同 CDN IP，部分网络可用)
   URLS+=("https://raw.githubusercontent.com/$REPO/$VERSION/dist/$GZ_FILE")
 
-  # 源4: Gitee Releases (备选，需在 Gitee 上发布)
-  URLS+=("https://gitee.com/$GITEE_REPO/releases/download/$VERSION/$GZ_FILE")
+  # 源4: Gitee raw 文件（直接用仓库里的 dist/ 目录）
+  URLS+=("https://gitee.com/$GITEE_REPO/raw/main/dist/$GZ_FILE")
 
   local SUCCESS=false
   for url in "${URLS[@]}"; do
@@ -143,7 +143,8 @@ if ! command -v go &>/dev/null; then
   echo ""
   echo -e "${YELLOW}💡 也可以手动下载预编译二进制:${NC}"
   echo -e "   https://github.com/$REPO/releases/tag/$VERSION"
-  echo -e "   https://gitee.com/$GITEE_REPO/releases/tag/$VERSION"
+  echo -e "   或从 Gitee 下载:"
+  echo -e "   https://gitee.com/$GITEE_REPO/blob/main/dist/loadforge-linux-${OS}-${ARCH}.gz"
   exit 1
 fi
 
