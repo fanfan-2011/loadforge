@@ -79,10 +79,15 @@ The script automatically tries multiple download sources:
 | ① | GitHub Releases | Global |
 | ② | jsDelivr CDN | China / Asia (fast) |
 | ③ | Raw GitHub | Fallback |
-| ④ | Gitee Releases | China (requires Gitee mirror) |
+| ④ | Gitee Releases | China (fast) |
 | ⑤ | Build from source | Anywhere (requires Go + Node.js) |
 
 If all downloads fail, it falls back to building from source with China-friendly mirrors (`goproxy.cn`, `npmmirror.com`).
+
+> 💡 If GitHub is inaccessible, install directly from Gitee:
+> ```bash
+> curl -fsSL https://gitee.com/fan-haoran-01/loadforge/raw/main/install.sh | bash
+> ```
 
 After installation, verify:
 

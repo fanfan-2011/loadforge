@@ -79,10 +79,15 @@ curl -fsSL https://github.com/fanfan-2011/loadforge/raw/main/install.sh | bash
 | ① | GitHub Releases | 全球 |
 | ② | jsDelivr CDN | 中国大陆 / 亚洲（快速） |
 | ③ | Raw GitHub | 备用 |
-| ④ | Gitee Releases | 中国大陆（需配置 Gitee 镜像） |
+| ④ | Gitee Releases | 中国大陆 |
 | ⑤ | 源码编译 | 任意环境（需 Go + Node.js） |
 
 所有下载源都失败后，会自动从源码编译（使用 `goproxy.cn`、`npmmirror.com` 国内加速）。
+
+> 💡 如果 GitHub 完全不可用，也可直接从 Gitee 安装：
+> ```bash
+> curl -fsSL https://gitee.com/fan-haoran-01/loadforge/raw/main/install.sh | bash
+> ```
 
 安装后验证：
 

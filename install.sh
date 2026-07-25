@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO="fanfan-2011/loadforge"
-GITEE_REPO="fanfan-2011/loadforge"   # 如果 Gitee 用户名不同可改
+GITEE_REPO="fan-haoran-01/loadforge"
 BIN_NAME="loadforge"
 INSTALL_DIR="/usr/local/bin"
 VERSION="v1.0.0"
