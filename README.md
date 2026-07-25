@@ -46,6 +46,7 @@ LoadForge is a high-performance, cross-platform, **single-binary** HTTP/HTTPS lo
 | **📦 Single Binary** | compiled with Go, embed web UI — zero runtime dependencies |
 | **🌍 Cross-Platform** | runs on Linux, macOS, and Windows (build from source) |
 | **♾️ Unlimited Scale** | tested with 100K+ requests and 1000+ concurrent connections |
+| **🔄 Auto Update** | built-in version check + `loadforge update` to self-upgrade |
 
 ---
 
