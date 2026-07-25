@@ -10,24 +10,18 @@ permissions:
 
 jobs:
   build:
-    name: Build and Release
+    name: Build
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux]
         goarch: [amd64, arm64]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: '1.21'
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
@@ -38,38 +32,98 @@ jobs:
           npm run build
           cd ../..
 
-      - name: Build Binary
+      - name: Build Binary (${{ matrix.goarch }})
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+          GOOS=linux GOARCH=${{ matrix.goarch }} \
             go build -ldflags="-s -w -X github.com/nousresearch/loadforge/version.Version=$VERSION" \
-            -o "loadforge-${{ matrix.goos }}-${{ matrix.goarch }}" .
+            -o "loadforge-linux-${{ matrix.goarch }}" .
 
       - name: Package
         run: |
-          gzip -k -f "loadforge-${{ matrix.goos }}-${{ matrix.goarch }}"
+          gzip -k -f "loadforge-linux-${{ matrix.goarch }}"
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            loadforge-${{ matrix.goos }}-${{ matrix.goarch }}.gz
+          files: loadforge-linux-${{ matrix.goarch }}.gz
           generate_release_notes: true
+
+      - name: Upload artifact for Gitee sync
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-linux-${{ matrix.goarch }}
+          path: loadforge-linux-${{ matrix.goarch }}.gz
 
   sync-to-gitee:
     name: Sync to Gitee
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Sync to Gitee
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: binary-*
+          merge-multiple: true
+
+      - name: List artifacts
+        run: ls -lh dist/
+
+      - name: Sync code and tags to Gitee
         env:
           GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
         run: |
           git remote add gitee https://fan-haoran-01:${GITEE_TOKEN}@gitee.com/fan-haoran-01/loadforge.git
           git push gitee --tags --force
           git push gitee main:main --force
+
+      - name: Create Gitee Release and upload assets
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          # Create release on Gitee
+          echo "Creating Gitee release for $TAG_NAME..."
+          RELEASE_JSON=$(curl -s -X POST \
+            "https://gitee.com/api/v5/repos/fan-haoran-01/loadforge/releases" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"access_token\": \"${GITEE_TOKEN}\",
+              \"tag_name\": \"${TAG_NAME}\",
+              \"target_commitish\": \"main\",
+              \"name\": \"${TAG_NAME}\",
+              \"body\": \"LoadForge ${TAG_NAME}\\n\\n### Install\\ncurl -fsSL https://gitee.com/fan-haoran-01/loadforge/raw/main/install.sh | bash\",
+              \"prerelease\": false
+            }")
+
+          RELEASE_ID=$(echo "$RELEASE_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin).get('id',''))" 2>/dev/null || echo "")
+
+          if [ -z "$RELEASE_ID" ]; then
+            echo "Release may already exist, fetching existing release ID..."
+            RELEASE_ID=$(curl -s "https://gitee.com/api/v5/repos/fan-haoran-01/loadforge/releases/tags/${TAG_NAME}?access_token=${GITEE_TOKEN}" \
+              | python3 -c "import sys,json; print(json.load(sys.stdin).get('id','') or '')" 2>/dev/null || echo "")
+          fi
+
+          if [ -z "$RELEASE_ID" ]; then
+            echo "ERROR: Could not create or find Gitee release"
+            exit 1
+          fi
+
+          echo "Gitee release ID: $RELEASE_ID"
+
+          # Upload each binary as an attachment
+          for FILE in dist/loadforge-linux-*.gz; do
+            [ -f "$FILE" ] || continue
+            echo "Uploading $FILE to Gitee release..."
+            curl -s -X POST \
+              "https://gitee.com/api/v5/repos/fan-haoran-01/loadforge/releases/${RELEASE_ID}/attach_files?access_token=${GITEE_TOKEN}" \
+              -F "file=@${FILE}" > /dev/null
+            echo "  Done"
+          done
+
+          echo "✅ Gitee release complete: https://gitee.com/fan-haoran-01/loadforge/releases/tag/${TAG_NAME}"
