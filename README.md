@@ -72,6 +72,18 @@ Install LoadForge anywhere on Linux/macOS with a single command:
 curl -fsSL https://github.com/fanfan-2011/loadforge/raw/main/install.sh | bash
 ```
 
+The script automatically tries multiple download sources:
+
+| Priority | Source | Region |
+|----------|--------|--------|
+| ① | GitHub Releases | Global |
+| ② | jsDelivr CDN | China / Asia (fast) |
+| ③ | Raw GitHub | Fallback |
+| ④ | Gitee Releases | China (requires Gitee mirror) |
+| ⑤ | Build from source | Anywhere (requires Go + Node.js) |
+
+If all downloads fail, it falls back to building from source with China-friendly mirrors (`goproxy.cn`, `npmmirror.com`).
+
 After installation, verify:
 
 ```bash
