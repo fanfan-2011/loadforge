@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux]
+        goarch: [amd64, arm64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Frontend
+        run: |
+          cd report/ui
+          npm install --silent
+          npm run build
+          cd ../..
+
+      - name: Build Binary
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+            go build -ldflags="-s -w -X github.com/nousresearch/loadforge/version.Version=$VERSION" \
+            -o "loadforge-${{ matrix.goos }}-${{ matrix.goarch }}" .
+
+      - name: Package
+        run: |
+          gzip -k -f "loadforge-${{ matrix.goos }}-${{ matrix.goarch }}"
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            loadforge-${{ matrix.goos }}-${{ matrix.goarch }}.gz
+          generate_release_notes: true
+
+  sync-to-gitee:
+    name: Sync to Gitee
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync to Gitee
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+        run: |
+          git remote add gitee https://fan-haoran-01:${GITEE_TOKEN}@gitee.com/fan-haoran-01/loadforge.git
+          git push gitee --tags --force
+          git push gitee main:main --force
