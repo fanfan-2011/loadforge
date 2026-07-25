@@ -69,7 +69,7 @@ install_binary() {
 
 # --- Try pre-built binary first ---
 if [ "${BUILD_FROM_SOURCE:-false}" = false ]; then
-  LATEST_URL="https://raw.githubusercontent.com/$REPO/main/dist/loadforge-${OS}-${ARCH}.tar.gz"
+  LATEST_URL="https://github.com/$REPO/releases/download/v1.0.0/loadforge-${OS}-${ARCH}.tar.gz"
   echo -e "${CYAN}📡 正在下载 LoadForge (${OS}-${ARCH})...${NC}"
 
   TMP_DIR=$(mktemp -d)
