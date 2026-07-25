@@ -659,6 +659,7 @@ loadforge/
 
 - 💬 **Discord**: [Join the discussion](https://discord.gg/zqQ6rdYT) — get help, share ideas, report issues
 - 🐛 **GitHub Issues**: [Report bugs or request features](https://github.com/fanfan-2011/loadforge/issues)
+- 🐛 **Gitee Issues**: [Report bugs (CN)](https://gitee.com/fan-haoran-01/loadforge/issues)
 - ⭐ **Star**: If LoadForge helps you, please give it a star!
 - 🔀 **Contributions**: PRs welcome! See our contributing guidelines
 

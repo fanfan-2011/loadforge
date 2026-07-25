@@ -664,6 +664,7 @@ npm config set registry https://registry.npmmirror.com
 
 - 💬 **Discord**: [加入讨论](https://discord.gg/zqQ6rdYT) — 获取帮助、分享想法、报告问题
 - 🐛 **GitHub Issues**: [报告 Bug 或请求新功能](https://github.com/fanfan-2011/loadforge/issues)
+- 🐛 **Gitee Issues**: [报告 Bug（国内）](https://gitee.com/fan-haoran-01/loadforge/issues)
 - ⭐ **Star**: 如果 LoadForge 帮到了你，请点个 Star！
 - 🔀 **贡献**: 欢迎 Pull Request！
 
