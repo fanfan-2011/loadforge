@@ -2,15 +2,17 @@
 set -euo pipefail
 
 REPO="fanfan-2011/loadforge"
+GITEE_REPO="fanfan-2011/loadforge"   # 如果 Gitee 用户名不同可改
 BIN_NAME="loadforge"
 INSTALL_DIR="/usr/local/bin"
+VERSION="v1.0.0"
 
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 echo -e "${CYAN}╔══════════════════════════════════════╗${NC}"
 echo -e "${CYAN}║     LoadForge 一键安装脚本            ║${NC}"
@@ -39,14 +41,6 @@ case "$OS" in
     ;;
 esac
 
-# --- Check if already installed ---
-if command -v "$BIN_NAME" &>/dev/null; then
-  EXISTING_PATH=$(command -v "$BIN_NAME")
-  echo -e "${YELLOW}⚠  已检测到 LoadForge: $EXISTING_PATH${NC}"
-  echo -e "   如需覆盖安装，重新运行本脚本即可。"
-  echo ""
-fi
-
 # --- Check write permission ---
 if [ ! -w "$INSTALL_DIR" ]; then
   USE_SUDO=true
@@ -57,7 +51,6 @@ fi
 install_binary() {
   local src="$1"
   local dst="$2"
-
   if [ "$USE_SUDO" = true ]; then
     sudo mv "$src" "$dst"
     sudo chmod +x "$dst"
@@ -67,44 +60,90 @@ install_binary() {
   fi
 }
 
-# --- Try pre-built binary first ---
-if [ "${BUILD_FROM_SOURCE:-false}" = false ]; then
-  LATEST_URL="https://github.com/$REPO/releases/download/v1.0.0/loadforge-${OS}-${ARCH}.tar.gz"
-  echo -e "${CYAN}📡 正在下载 LoadForge (${OS}-${ARCH})...${NC}"
-
+# ============================================================
+#  多源下载：依次尝试，一个成功即停止
+# ============================================================
+download_and_install() {
+  local TMP_DIR
   TMP_DIR=$(mktemp -d)
   trap "rm -rf '$TMP_DIR'" EXIT
 
-  if curl -fsSL --connect-timeout 10 --max-time 60 "$LATEST_URL" -o "$TMP_DIR/loadforge.tar.gz" 2>/dev/null; then
-    tar -xzf "$TMP_DIR/loadforge.tar.gz" -C "$TMP_DIR" 2>/dev/null || {
-      mv "$TMP_DIR/loadforge.tar.gz" "$TMP_DIR/loadforge" 2>/dev/null || true
-    }
+  local FILENAME="loadforge-${OS}-${ARCH}"
+  local GZ_FILE="${FILENAME}.gz"
 
-    if [ -f "$TMP_DIR/loadforge" ]; then
-      echo -e "${CYAN}📦 正在安装到 $INSTALL_DIR/${BIN_NAME} ...${NC}"
-      install_binary "$TMP_DIR/loadforge" "$INSTALL_DIR/$BIN_NAME"
-      echo -e "${GREEN}✅ LoadForge 安装成功！${NC}"
-      rm -rf "$TMP_DIR"
-      trap - EXIT
-      echo ""
-      echo -e "  运行: ${CYAN}loadforge bench -n 1000 -c 10 https://example.com${NC}"
-      echo ""
-      exit 0
+  # ---- 源列表 ----
+  # 依次尝试以下 URL，成功即安装退出
+  local URLS=()
+
+  # 源1: GitHub Releases
+  URLS+=("https://github.com/$REPO/releases/download/$VERSION/$GZ_FILE")
+
+  # 源2: jsDelivr CDN (从 repo dist/ 目录分发，国内速度快)
+  URLS+=("https://cdn.jsdelivr.net/gh/$REPO@$VERSION/dist/$GZ_FILE")
+
+  # 源3: raw.githubusercontent.com (不同 CDN IP，部分网络可用)
+  URLS+=("https://raw.githubusercontent.com/$REPO/$VERSION/dist/$GZ_FILE")
+
+  # 源4: Gitee Releases (备选，需在 Gitee 上发布)
+  URLS+=("https://gitee.com/$GITEE_REPO/releases/download/$VERSION/$GZ_FILE")
+
+  local SUCCESS=false
+  for url in "${URLS[@]}"; do
+    echo -e "${CYAN}📡 尝试下载: ${url}${NC}"
+    if curl -fsSL --connect-timeout 10 --max-time 60 "$url" -o "$TMP_DIR/$GZ_FILE" 2>/dev/null; then
+      echo -e "${GREEN}✅ 下载成功${NC}"
+      # 解压（.gz 文件用 gunzip 或 gzip -d）
+      if command -v gunzip &>/dev/null; then
+        gunzip -c "$TMP_DIR/$GZ_FILE" > "$TMP_DIR/$FILENAME" 2>/dev/null || cp "$TMP_DIR/$GZ_FILE" "$TMP_DIR/$FILENAME"
+      else
+        gzip -d -c "$TMP_DIR/$GZ_FILE" > "$TMP_DIR/$FILENAME" 2>/dev/null || cp "$TMP_DIR/$GZ_FILE" "$TMP_DIR/$FILENAME"
+      fi
+
+      if [ -f "$TMP_DIR/$FILENAME" ] && [ -s "$TMP_DIR/$FILENAME" ]; then
+        echo -e "${CYAN}📦 正在安装到 $INSTALL_DIR/$BIN_NAME ...${NC}"
+        install_binary "$TMP_DIR/$FILENAME" "$INSTALL_DIR/$BIN_NAME"
+        echo -e "${GREEN}✅ LoadForge 安装成功！${NC}"
+        rm -rf "$TMP_DIR"
+        trap - EXIT
+        SUCCESS=true
+        break
+      fi
     fi
-  fi
+    echo -e "${YELLOW}⚠  该源不可用，尝试下一个...${NC}"
+  done
 
-  echo -e "${YELLOW}⚠  预编译二进制下载失败，尝试从源码编译...${NC}"
-  trap - EXIT
-  rm -rf "$TMP_DIR"
+  if [ "$SUCCESS" = false ]; then
+    trap - EXIT
+    rm -rf "$TMP_DIR"
+    return 1
+  fi
+  return 0
+}
+
+# --- 尝试预编译二进制下载 ---
+if [ "${BUILD_FROM_SOURCE:-false}" = false ]; then
+  if download_and_install; then
+    echo ""
+    echo -e "  运行: ${CYAN}$BIN_NAME bench -n 1000 -c 10 https://example.com${NC}"
+    echo ""
+    exit 0
+  fi
+  echo -e "${YELLOW}⚠  所有下载源均不可用，尝试从源码编译...${NC}"
 fi
 
-# --- Build from source ---
+# ============================================================
+#  源码编译（兜底）
+# ============================================================
 echo -e "${CYAN}🔧 正在从源码编译 LoadForge ...${NC}"
 
-# Check prerequisites
+# 检查 Go
 if ! command -v go &>/dev/null; then
   echo -e "${RED}❌ 需要安装 Go 1.18+${NC}"
   echo -e "   安装方法: https://go.dev/dl/"
+  echo ""
+  echo -e "${YELLOW}💡 也可以手动下载预编译二进制:${NC}"
+  echo -e "   https://github.com/$REPO/releases/tag/$VERSION"
+  echo -e "   https://gitee.com/$GITEE_REPO/releases/tag/$VERSION"
   exit 1
 fi
 
@@ -114,36 +153,41 @@ if [ "$(echo "$GO_VERSION" | cut -d. -f1)" -eq 0 ] || { [ "$(echo "$GO_VERSION" 
   exit 1
 fi
 
+# 设置国内代理（如果可用）
+export GOPROXY=https://goproxy.cn,https://goproxy.io,direct
+
+# 检查 Node.js
 if ! command -v npm &>/dev/null && ! command -v node &>/dev/null; then
   echo -e "${YELLOW}⚠  Node.js/npm 未安装，Web 报告功能将不可用${NC}"
-  echo -e "   编译仍会继续（仅 CLI 模式）..."
   SKIP_UI=true
 fi
 
-# Clone or use existing
+# 克隆仓库
 TMP_DIR=$(mktemp -d)
 trap "rm -rf '$TMP_DIR'" EXIT
 
-echo -e "${CYAN}📥 克隆仓库...${NC}"
+echo -e "${CYAN}📥 克隆仓库 (GitHub)...${NC}"
 git clone --depth 1 "https://github.com/$REPO.git" "$TMP_DIR/loadforge" 2>/dev/null || {
-  echo -e "${RED}❌ 克隆仓库失败${NC}"
-  echo -e "   请检查网络连接或手动克隆:"
-  echo -e "   git clone https://github.com/$REPO.git"
-  exit 1
+  echo -e "${YELLOW}⚠  GitHub 克隆失败，尝试 Gitee...${NC}"
+  git clone --depth 1 "https://gitee.com/$GITEE_REPO.git" "$TMP_DIR/loadforge" 2>/dev/null || {
+    echo -e "${RED}❌ 仓库克隆失败${NC}"
+    exit 1
+  }
 }
 
 cd "$TMP_DIR/loadforge"
 
-# Build frontend
+# 构建前端
 if [ "${SKIP_UI:-false}" = false ]; then
   echo -e "${CYAN}🎨 构建 Web 前端...${NC}"
   cd report/ui
+  npm config set registry https://registry.npmmirror.com 2>/dev/null || true
   npm install --silent 2>/dev/null
   npm run build 2>/dev/null
   cd ../..
 fi
 
-# Build Go binary
+# 编译
 echo -e "${CYAN}⚙️  编译 Go 二进制...${NC}"
 go build -ldflags="-s -w" -o "$BIN_NAME" . 2>&1
 
@@ -152,7 +196,7 @@ if [ ! -f "$BIN_NAME" ]; then
   exit 1
 fi
 
-echo -e "${CYAN}📦 正在安装到 $INSTALL_DIR/${BIN_NAME} ...${NC}"
+echo -e "${CYAN}📦 正在安装到 $INSTALL_DIR/$BIN_NAME ...${NC}"
 install_binary "$BIN_NAME" "$INSTALL_DIR/$BIN_NAME"
 
 cd /
@@ -161,5 +205,5 @@ trap - EXIT
 
 echo -e "${GREEN}✅ LoadForge 安装成功！${NC}"
 echo ""
-echo -e "  运行: ${CYAN}loadforge bench -n 1000 -c 10 https://example.com${NC}"
+echo -e "  运行: ${CYAN}$BIN_NAME bench -n 1000 -c 10 https://example.com${NC}"
 echo ""
