@@ -3,7 +3,7 @@
 > A modern ApacheBench alternative — high-performance HTTP/HTTPS load testing tool
 
 [![Go Version](https://img.shields.io/badge/Go-1.18+-00ADD8?style=flat&logo=go)](https://golang.org)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
 [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=flat&logo=discord)](https://discord.gg/zqQ6rdYT)
 [![Release](https://img.shields.io/github/v/release/fanfan-2011/loadforge?style=flat)](https://github.com/fanfan-2011/loadforge/releases)
 
@@ -667,6 +667,8 @@ loadforge/
 
 ## 📄 License
 
-MIT License © 2026 [fanfan-2011](https://github.com/fanfan-2011)
+GNU General Public License v3.0 © 2026 [fanfan-2011](https://github.com/fanfan-2011)
+
+See the [LICENSE](LICENSE) file for details.
 
 *Built with ❤️ using Go and Vue.js*
