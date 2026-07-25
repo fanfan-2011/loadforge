@@ -67,29 +67,15 @@ install_binary() {
   fi
 }
 
-# --- Try pre-built binary first (bypass DNS pollution) ---
+# --- Try pre-built binary first ---
 if [ "${BUILD_FROM_SOURCE:-false}" = false ]; then
-  # Use direct IP to bypass DNS pollution (GFW)
-  GITHUB_IP="20.205.243.166"
   LATEST_URL="https://github.com/$REPO/releases/latest/download/loadforge-${OS}-${ARCH}.tar.gz"
   echo -e "${CYAN}📡 正在下载 LoadForge (${OS}-${ARCH})...${NC}"
 
   TMP_DIR=$(mktemp -d)
   trap "rm -rf '$TMP_DIR'" EXIT
 
-  # Try direct connection first, fallback to IP with Host header
   if curl -fsSL --connect-timeout 10 --max-time 60 "$LATEST_URL" -o "$TMP_DIR/loadforge.tar.gz" 2>/dev/null; then
-    : # download succeeded
-  elif curl -fsSL --connect-timeout 10 --max-time 60 --resolve "github.com:443:$GITHUB_IP" \
-    "https://github.com/$REPO/releases/latest/download/loadforge-${OS}-${ARCH}.tar.gz" \
-    -o "$TMP_DIR/loadforge.tar.gz" 2>/dev/null; then
-    : # download succeeded via IP
-  else
-    echo -e "${YELLOW}⚠  预编译二进制下载失败，尝试从源码编译...${NC}"
-    BUILD_FROM_SOURCE=true
-  fi
-
-  if [ "${BUILD_FROM_SOURCE:-false}" = false ]; then
     tar -xzf "$TMP_DIR/loadforge.tar.gz" -C "$TMP_DIR" 2>/dev/null || {
       mv "$TMP_DIR/loadforge.tar.gz" "$TMP_DIR/loadforge" 2>/dev/null || true
     }
@@ -107,6 +93,7 @@ if [ "${BUILD_FROM_SOURCE:-false}" = false ]; then
     fi
   fi
 
+  echo -e "${YELLOW}⚠  预编译二进制下载失败，尝试从源码编译...${NC}"
   trap - EXIT
   rm -rf "$TMP_DIR"
 fi
@@ -138,20 +125,11 @@ TMP_DIR=$(mktemp -d)
 trap "rm -rf '$TMP_DIR'" EXIT
 
 echo -e "${CYAN}📥 克隆仓库...${NC}"
-# Bypass DNS pollution: use IP directly
-git clone --depth 1 "https://github.com/$REPO.git" "$TMP_DIR/loadforge" \
-  --config http.https://github.com.proxy="" 2>/dev/null || {
-  # Fallback: use IP with Host header
-  GIT_TERMINAL_PROMPT=0 GIT_SSL_NO_VERIFY=0 \
-  git -c http.proxy= \
-    clone --depth 1 \
-    "https://20.205.243.166/$REPO.git" \
-    "$TMP_DIR/loadforge" 2>/dev/null || {
-    echo -e "${RED}❌ 克隆仓库失败（网络不通）${NC}"
-    echo -e "   请检查网络连接或手动克隆:"
-    echo -e "   git clone https://github.com/$REPO.git"
-    exit 1
-  }
+git clone --depth 1 "https://github.com/$REPO.git" "$TMP_DIR/loadforge" 2>/dev/null || {
+  echo -e "${RED}❌ 克隆仓库失败${NC}"
+  echo -e "   请检查网络连接或手动克隆:"
+  echo -e "   git clone https://github.com/$REPO.git"
+  exit 1
 }
 
 cd "$TMP_DIR/loadforge"

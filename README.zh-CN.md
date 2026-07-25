@@ -53,26 +53,8 @@ LoadForge 是一个高性能、跨平台、**单文件发布** 的 HTTP/HTTPS �
 Linux/macOS 用户一行命令安装：
 
 ```bash
-# 标准安装（海外用户）
 curl -fsSL https://github.com/fanfan-2011/loadforge/raw/main/install.sh | bash
 ```
-
-> 🇨🇳 **中国大陆用户**（DNS 被污染，需用 --resolve 绕过）：
-> ```bash
-> curl -fsSL \
->   --resolve "github.com:443:20.205.243.166" \
->   --resolve "raw.githubusercontent.com:443:185.199.110.133" \
->   https://github.com/fanfan-2011/loadforge/raw/main/install.sh | bash
-> ```
->
-> 如果以上仍超时，手动安装：
-> ```bash
-> git clone https://github.com/fanfan-2011/loadforge.git
-> cd loadforge
-> cd report/ui && npm install && npm run build && cd ../..
-> go build -ldflags="-s -w" -o loadforge .
-> sudo mv loadforge /usr/local/bin/
-> ```
 
 安装后验证：
 
