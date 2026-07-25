@@ -11,14 +11,14 @@ import (
 
 // BenchConfig 压测配置
 type BenchConfig struct {
-	URL         string
-	Method      string
-	Headers     map[string]string
-	Body        string
-	Concurrency int
-	NumRequests int
-	Duration    time.Duration
-	Timeout     time.Duration
+	URL         string            `json:"url"`
+	Method      string            `json:"method"`
+	Headers     map[string]string `json:"headers"`
+	Body        string            `json:"body"`
+	Concurrency int               `json:"concurrency"`
+	NumRequests int               `json:"num_requests"`
+	Duration    time.Duration     `json:"duration"`
+	Timeout     time.Duration     `json:"timeout"`
 }
 
 // RequestResult 单次请求结果
@@ -45,8 +45,8 @@ type TimelinePoint struct {
 	Latency   float64   `json:"latency"`
 }
 
-// RunBench 执行压测
-func RunBench(config *BenchConfig) *BenchResult {
+// RunBench 执行压测，progress 为可选进度回调（每秒触发）
+func RunBench(config *BenchConfig, progress ...func(total, completed int64, qps float64)) *BenchResult {
 	// 创建 HTTP 客户端
 	transport := &http.Transport{
 		MaxIdleConns:        config.Concurrency * 2,
@@ -108,6 +108,11 @@ func RunBench(config *BenchConfig) *BenchResult {
 				current := atomic.LoadInt64(&completedRequests)
 				qps := float64(current-lastCount) / 1.0
 				lastCount = current
+
+				// 进度回调
+				if len(progress) > 0 {
+					progress[0](atomic.LoadInt64(&totalRequests), current, qps)
+				}
 
 				mu.Lock()
 				var avgLatency float64

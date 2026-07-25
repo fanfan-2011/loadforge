@@ -100,11 +100,31 @@ var benchCmd = &cobra.Command{
 		}
 
 		startTime := time.Now()
-		result := engine.RunBench(config)
+
+		// 实时进度显示（非 JSON 模式）
+		if !flagJSON {
+			fmt.Printf("   ⏳ 正在压测中...\n")
+		}
+
+		result := engine.RunBench(config, func(total, completed int64, qps float64) {
+			if !flagJSON {
+				totalStr := fmt.Sprintf("%d", total)
+				if flagT != "" {
+					totalStr = "?"
+				}
+				fmt.Printf("\r   进度: %d / %s   QPS: %.0f  已用: %ds     ",
+					completed, totalStr, qps, int(time.Since(startTime).Seconds()))
+			}
+		})
 		elapsed := time.Since(startTime)
 
 		// 计算统计
 		stat := stats.Calculate(result, elapsed)
+
+		// 清除进度行
+		if !flagJSON {
+			fmt.Print("\r                                                             \r")
+		}
 
 		// 命令行输出
 		if flagJSON {

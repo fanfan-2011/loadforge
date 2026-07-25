@@ -22,6 +22,7 @@ type TestStats struct {
 	StatusCodes     map[int]int        `json:"status_codes"`
 	Errors          map[string]int     `json:"errors"`
 	Duration        float64            `json:"duration_seconds"`
+	Timestamp       int64              `json:"timestamp"`
 	Config          *engine.BenchConfig `json:"config"`
 	PerformanceTips []string           `json:"performance_tips"`
 }
@@ -48,6 +49,7 @@ func Calculate(result *engine.BenchResult, elapsed time.Duration) *TestStats {
 
 	stat.TotalRequests = len(result.Results)
 	stat.Duration = elapsed.Seconds()
+	stat.Timestamp = time.Now().UnixMilli()
 
 	latencies := make([]float64, 0, len(result.Results))
 
