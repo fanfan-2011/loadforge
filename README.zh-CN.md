@@ -76,10 +76,10 @@ curl -fsSL https://github.com/fanfan-2011/loadforge/raw/main/install.sh | bash
 
 | 优先级 | 源 | 适用 |
 |--------|-----|------|
-| ① | GitHub Releases | 全球 |
+| ① | Gitee 仓库直链 | 中国大陆（快速） |
 | ② | jsDelivr CDN | 中国大陆 / 亚洲（快速） |
 | ③ | Raw GitHub | 备用 |
-| ④ | Gitee Releases | 中国大陆 |
+| ④ | GitHub Releases | 全球 |
 | ⑤ | 源码编译 | 任意环境（需 Go + Node.js） |
 
 所有下载源都失败后，会自动从源码编译（使用 `goproxy.cn`、`npmmirror.com` 国内加速）。

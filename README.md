@@ -76,10 +76,10 @@ The script automatically tries multiple download sources:
 
 | Priority | Source | Region |
 |----------|--------|--------|
-| ① | GitHub Releases | Global |
+| ① | Gitee Releases | China (fast) |
 | ② | jsDelivr CDN | China / Asia (fast) |
 | ③ | Raw GitHub | Fallback |
-| ④ | Gitee Releases | China (fast) |
+| ④ | GitHub Releases | Global |
 | ⑤ | Build from source | Anywhere (requires Go + Node.js) |
 
 If all downloads fail, it falls back to building from source with China-friendly mirrors (`goproxy.cn`, `npmmirror.com`).

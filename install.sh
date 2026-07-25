@@ -75,17 +75,17 @@ download_and_install() {
   # 依次尝试以下 URL，成功即安装退出
   local URLS=()
 
-  # 源1: GitHub Releases
-  URLS+=("https://github.com/$REPO/releases/download/$VERSION/$GZ_FILE")
+  # 源1: Gitee raw 文件（中国大陆速度快，直接从仓库 dist/ 目录提供）
+  URLS+=("https://gitee.com/$GITEE_REPO/raw/main/dist/$GZ_FILE")
 
-  # 源2: jsDelivr CDN (从 repo dist/ 目录分发，国内速度快)
+  # 源2: jsDelivr CDN (从 GitHub repo dist/ 目录分发，国内速度快)
   URLS+=("https://cdn.jsdelivr.net/gh/$REPO@$VERSION/dist/$GZ_FILE")
 
   # 源3: raw.githubusercontent.com (不同 CDN IP，部分网络可用)
   URLS+=("https://raw.githubusercontent.com/$REPO/$VERSION/dist/$GZ_FILE")
 
-  # 源4: Gitee raw 文件（直接用仓库里的 dist/ 目录）
-  URLS+=("https://gitee.com/$GITEE_REPO/raw/main/dist/$GZ_FILE")
+  # 源4: GitHub Releases
+  URLS+=("https://github.com/$REPO/releases/download/$VERSION/$GZ_FILE")
 
   local SUCCESS=false
   for url in "${URLS[@]}"; do
@@ -167,10 +167,10 @@ fi
 TMP_DIR=$(mktemp -d)
 trap "rm -rf '$TMP_DIR'" EXIT
 
-echo -e "${CYAN}📥 克隆仓库 (GitHub)...${NC}"
-git clone --depth 1 "https://github.com/$REPO.git" "$TMP_DIR/loadforge" 2>/dev/null || {
-  echo -e "${YELLOW}⚠  GitHub 克隆失败，尝试 Gitee...${NC}"
-  git clone --depth 1 "https://gitee.com/$GITEE_REPO.git" "$TMP_DIR/loadforge" 2>/dev/null || {
+echo -e "${CYAN}📥 克隆仓库...${NC}"
+git clone --depth 1 "https://gitee.com/$GITEE_REPO.git" "$TMP_DIR/loadforge" 2>/dev/null || {
+  echo -e "${YELLOW}⚠  Gitee 克隆失败，尝试 GitHub...${NC}"
+  git clone --depth 1 "https://github.com/$REPO.git" "$TMP_DIR/loadforge" 2>/dev/null || {
     echo -e "${RED}❌ 仓库克隆失败${NC}"
     exit 1
   }
