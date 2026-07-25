@@ -5,7 +5,7 @@ REPO="fanfan-2011/loadforge"
 GITEE_REPO="fan-haoran-01/loadforge"
 BIN_NAME="loadforge"
 INSTALL_DIR="/usr/local/bin"
-VERSION="v1.0.0"
+VERSION="${VERSION:-v1.0.0}"
 
 # Colors
 RED='\033[0;31m'
@@ -190,7 +190,7 @@ fi
 
 # 编译
 echo -e "${CYAN}⚙️  编译 Go 二进制...${NC}"
-go build -ldflags="-s -w" -o "$BIN_NAME" . 2>&1
+go build -ldflags="-s -w -X github.com/nousresearch/loadforge/version.Version=$VERSION" -o "$BIN_NAME" . 2>&1
 
 if [ ! -f "$BIN_NAME" ]; then
   echo -e "${RED}❌ 编译失败${NC}"
