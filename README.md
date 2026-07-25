@@ -16,7 +16,8 @@ LoadForge is a high-performance, cross-platform, **single-binary** HTTP/HTTPS lo
 ## 📦 Table of Contents
 
 - [Features](#-features)
-- [Installation](#-installation)
+- [Environment Requirements](#-environment-requirements)
+- [One-Click Install](#-one-click-install)
 - [Quick Start](#-quick-start)
 - [Usage Guide](#-usage-guide)
 - [CLI Reference](#-cli-reference)
@@ -48,6 +49,21 @@ LoadForge is a high-performance, cross-platform, **single-binary** HTTP/HTTPS lo
 
 ---
 
+## 🖥️ Environment Requirements
+
+| Requirement | Runtime (binary) | Build from source |
+|-------------|------------------|-------------------|
+| **OS** | Linux, macOS, Windows | Linux, macOS, Windows |
+| **CPU** | x86-64 or ARM64 | x86-64 or ARM64 |
+| **RAM** | 128 MB | 512 MB |
+| **Disk** | 10 MB | 100 MB |
+| **Go** | Not required | 1.18+ |
+| **Node.js** | Not required | 16+ |
+
+> Pre-built binaries include the embedded web UI — **no Go or Node.js needed** at runtime.
+
+---
+
 ## ⚡ One-Click Install
 
 Install LoadForge anywhere on Linux/macOS with a single command:
@@ -68,16 +84,6 @@ loadforge bench -n 100 -c 10 https://example.com
 ---
 
 ## 📥 Installation
-
-### System Requirements
-
-| Requirement | Minimum | Recommended |
-|-------------|---------|-------------|
-| **OS** | Linux kernel 3.10+, macOS 10.15+, Windows 10+ | Linux (any distro), macOS 12+, Windows 10+ |
-| **CPU** | x86-64, ARM64 | 2+ cores |
-| **RAM** | 128 MB | 512 MB+ |
-| **Disk** | 10 MB (binary only) | 100 MB (with frontend build) |
-| **Go** (to build) | 1.18 | 1.21+ |
 
 ### Option 1: Download Pre-built Binary (Recommended for Linux/macOS)
 
